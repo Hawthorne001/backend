@@ -1,6 +1,7 @@
 import z from 'zod';
 
 import { capitalize } from '../../utils';
+import { removeEmptyStrings } from '@/utils/utils';
 
 export interface DefaultSupplyProps {
   category: string;
@@ -12,7 +13,14 @@ const ShelterSchema = z.object({
   name: z.string().transform(capitalize),
   pix: z.string().nullable().optional(),
   address: z.string().transform(capitalize),
+  city: z.string().transform(capitalize).nullable().optional(),
+  neighbourhood: z.string().transform(capitalize).nullable().optional(),
+  street: z.string().transform(capitalize).nullable().optional(),
+  streetNumber: z.string().nullable().optional(),
+  zipCode: z.string().nullable().optional(),
   petFriendly: z.boolean().nullable().optional(),
+  shelteredPets: z.number().min(0).nullable().optional(),
+  petsCapacity: z.number().min(0).nullable().optional(),
   shelteredPeople: z.number().min(0).nullable().optional(),
   latitude: z.number().nullable().optional(),
   longitude: z.number().nullable().optional(),
@@ -33,13 +41,25 @@ const CreateShelterSchema = ShelterSchema.omit({
 const UpdateShelterSchema = ShelterSchema.pick({
   petFriendly: true,
   shelteredPeople: true,
+  shelteredPets: true,
+  petsCapacity: true,
 }).partial();
 
 const FullUpdateShelterSchema = ShelterSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-}).partial();
+})
+  .partial()
+  .transform((args) => removeEmptyStrings<typeof args>(args));
+
+export interface IShelterSupplyDecay {
+  shelterId: string;
+  supplyId: string;
+  priority: number;
+  createdAt: number;
+  updatedAt: number;
+}
 
 export {
   ShelterSchema,
